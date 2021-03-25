@@ -63,6 +63,9 @@ struct CostFunctor
                                                                 );
 
         // n_phi / sin(theta)
+        // HOW DO YOU ADD A CONSTANT VALUE AS THE THIRD ELEMENT?? NEED TO USE A JET STRUCT OBJ WITH a=0.0?? 
+        // Even if I figure out how to do that, I think it will cause an issue in the evaluation step when a double value number will be reqd.
+        // It will only work in the jacobian/derivative phase. 
         // const T CNST 
         // Jet<T, N>(cos(f.a), -sin(f.a) * f.v);
         Eigen::Matrix<T, 3, 1> n_phi_bar = Eigen::Matrix<T, 3, 1>(  - ceres::sin(phi[0]), 
@@ -173,6 +176,35 @@ int main(int argc, char **argv)
     std::cout << rho << ", " << kappa << ", " << theta << ", " << phi << ", " << alpha << std::endl;
     std::cout << "--- FINAL ---" << std::endl;
     std::cout << rho << ", " << kappa << ", " << theta << ", " << phi << ", " << alpha << std::endl;
+
+
+
+
+    std::cout << "--- FINAL CYLINDER VECTORS ---" << std::endl;
+
+    Eigen::Vector3d n_recon (   std::cos(phi)*std::sin(theta), 
+                                std::sin(phi)*std::sin(theta),
+                                std::cos(theta)
+                            );
+
+    // Partial deriv of n wrt theta
+    Eigen::Vector3d n_theta (   + std::cos(phi)*std::cos(theta), 
+                                + std::sin(phi)*std::cos(theta),
+                                - std::sin(theta)
+                            );
+
+    // n_phi / sin(theta)
+    Eigen::Vector3d n_phi_bar ( - std::sin(phi), 
+                                + std::cos(phi),
+                                + 0.0
+                            );
+
+    Eigen::Vector3d a_recon = n_theta*std::cos(alpha) + n_phi_bar*ceres::sin(alpha);
+
+    std::cout << "--- n ---" << std::endl;
+    std::cout << n_recon << std::endl;
+    std::cout << "--- a ---" << std::endl;
+    std::cout << a_recon << std::endl;
 
     return 0;
 }
