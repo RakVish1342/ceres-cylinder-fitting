@@ -1,9 +1,10 @@
 #include "ceres/ceres.h"
-#include "glog/logging.h"
-
 #include "ceres/jet.h"
 
 #include <math.h>
+#include <random>
+
+#include "glog/logging.h"
 
 using ceres::AutoDiffCostFunction;
 using ceres::CostFunction;
@@ -150,19 +151,38 @@ int main(int argc, char **argv)
     double alpha = 0.0;
 
     Problem problem;
+    // for (int i = 0; i < kNumObservations; ++i)
+    // {
+        
+    //     problem.AddResidualBlock(
+    //         new AutoDiffCostFunction<CostFunctor, 1, 1, 1, 1, 1, 1>(    // Dimensions of: residual, rho, kappa, theta, phi, alpha
+    //             new CostFunctor(data[3*i], data[3*i + 1], data[3*i + 2]) ),
+    //         NULL,
+    //         &rho,
+    //         &kappa,
+    //         &theta,
+    //         &phi,
+    //         &alpha);
+    // }
+
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    // std::default_random_engine gen; // uses a fixed seed
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    double epsilon = 0.01;
+    std::uniform_real_distribution<double> dis(-epsilon, +epsilon);
+
     for (int i = 0; i < kNumObservations; ++i)
     {
-        
         problem.AddResidualBlock(
             new AutoDiffCostFunction<CostFunctor, 1, 1, 1, 1, 1, 1>(    // Dimensions of: residual, rho, kappa, theta, phi, alpha
-                new CostFunctor(data[3*i], data[3*i + 1], data[3*i + 2]) ),
+                new CostFunctor(data[3*i]+dis(gen), data[3*i + 1]+dis(gen), data[3*i + 2]+dis(gen)) ),
             NULL,
             &rho,
             &kappa,
             &theta,
             &phi,
             &alpha);
-    }
+    }    
 
     Solver::Options options;
     options.max_num_iterations = 25;
